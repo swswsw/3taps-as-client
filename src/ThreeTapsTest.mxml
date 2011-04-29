@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   creationComplete="init()">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.serializers.json.JSONEncoder;
+			import com.threetaps.ThreeTaps;
+			
+			import mx.controls.Alert;
+			private function init():void {
+				var tt:ThreeTaps = new ThreeTaps();
+				tt.callGet("/reference/location", {}, onReferenceLocation);
+				
+				var posting1 = ['X73XFN', {accountName: "anonymous-X73XFN@mailserver.com"}];
+				var posting2 = ['X73XFP', {price: 20.00}];
+				var data = [posting1, posting2];
+				tt.callPost("/posting/update", data, onPostingUpdate);
+				
+				var posting1 = {
+					source: 'E_BAY',
+					category: 'SGBI',
+					location: 'LAX',
+					heading: 'Test Post 1 in Bicycles For Sale Category',
+					body: 'This is a test post. One.',
+					price: 1.00,
+					currency: 'USD',
+					annotations: {
+						color: 'red',
+						brand: 'Specialized'
+					},
+					"timestamp":"20101130232514",
+					externalURL: 'http://www.ebay.com'
+				};
+				var posting2 = {
+					source: 'E_BAY',
+					category: 'SGBI',
+					location: 'LAX',
+					heading: 'Test Post 2 in Bicycles For Sale Category',
+					body: 'This is a test post. Two.',
+					price: 2.00,
+					currency: 'USD',
+					"timestamp":"20101130232514",
+					externalURL: 'http://www.ebay.com/3jua8'
+				};
+				var postings = [posting1, posting2];
+				var parameters:Object = { postings: new JSONEncoder().encode(postings) };
+				tt.callPost("/posting/create", parameters, onPostingCreate);
+			}
+			
+			private function onReferenceLocation(result:Object):void {
+				txtResult.text = new JSONEncoder().encode(result);
+			}
+			
+			private function onPostingUpdate(result:Object):void {
+				txtPostingUpdateResult.text = new JSONEncoder().encode(result);
+			}
+			
+			private function onPostingCreate(result:Object):void {
+				txtPostingCreateResult.text = new JSONEncoder().encode(result);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:TextArea id="txtResult" x="10" y="52" width="287" height="246"/>
+	<s:TextArea id="txtPostingUpdateResult" x="305" y="52" height="149"/>
+	<s:TextArea id="txtPostingCreateResult" x="501" y="67"/>
+</s:Application>

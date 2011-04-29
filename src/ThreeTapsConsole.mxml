@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.serializers.json.JSONDecoder;
+			import com.adobe.serializers.json.JSONEncoder;
+			import com.threetaps.ThreeTaps;
+			
+			import mx.controls.Alert;
+			import mx.rpc.Fault;
+			
+			private var tt:ThreeTaps = new ThreeTaps();
+			
+			private function callHttp():void {
+				txtOutput.text = "";
+				var input:Object = {};
+				if (txtUri.textInput.text) {
+					var method:String = txtMethod.selectedItem;
+					if (txtInput.text) {
+						try {
+							input = new JSONDecoder().decode(txtInput.text);
+							trace("input="+input);
+							tt.callHttp(method, txtUri.textInput.text, input, onCallHttp);
+						} catch (err:Error) {
+							Alert.show("error in parsing json input.  Please check that your json input is correct.\n  Error="+err);
+							trace(err.getStackTrace());
+						}
+					}
+				} else {
+					Alert.show("Must enter an Uri.");
+				}
+				
+				
+			}
+			private function onCallHttp(result:Object):void {
+				if ("fault" in result) {
+					var fault:Fault = result.fault;
+					txtOutput.text = result.fault.faultString + "\n";
+				} else {
+					txtOutput.text = new JSONEncoder().encode(result);
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Label x="10" y="73" text="Note: do not use '' in your json input, please use &quot;&quot;"/>
+	<s:Label x="10" y="10" text="3Taps API Testing Console"/>
+	<s:Label x="126" y="33" text="Uri"/>
+	<s:ComboBox id="txtUri" x="150" y="30" width="317" selectedIndex="0">
+		<s:ArrayCollection>
+			<fx:String>/reference/location</fx:String>
+			<fx:String>/reference/category</fx:String>
+			<fx:String>/reference/source</fx:String>
+			<fx:String>/reference/modified/[reference-type]</fx:String>
+			<fx:String>/posting/get/[postKey]</fx:String>
+			<fx:String>/posting/create</fx:String>
+			<fx:String>/posting/update</fx:String>
+			<fx:String>/posting/delete</fx:String>
+			<fx:String>/posting/error/[postKey]</fx:String>
+		</s:ArrayCollection>
+	</s:ComboBox>
+	<s:Label x="11" y="88" text="Inputs"/>
+	<s:Label x="388" y="88" text="Output"/>
+	<s:TextArea id="txtInput" x="10" y="98" width="364" height="417"/>
+	<s:TextArea id="txtOutput" x="388" y="98" width="485" height="417"/>
+	<s:Button x="504" y="30" label="Call api" click="callHttp()"/>
+	<s:DropDownList id="txtMethod" x="10" y="30" width="71" selectedIndex="0">
+		<s:ArrayCollection>
+			<fx:String>GET</fx:String>
+			<fx:String>POST</fx:String>
+			<fx:String>DELETE</fx:String>
+			<fx:String>HEAD</fx:String>
+			<fx:String>PUT</fx:String>
+		</s:ArrayCollection>
+	</s:DropDownList>
+</s:Application>
